@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link href="content/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+    <script>
+        var app = angular.module('Finnkinosovellus', []);
+        app.controller('ScheduleController', function ($scope, $http) {
+
+            $scope.search = function () {
+                var area = document.getElementById("teat").value;
+                var date = document.getElementById("date").value;
+
+                console.log(area, date);
+                search(area, date);
+            }
+            $scope.select = function (value) {
+                $scope.current = value;
+            }
+
+            function search(area, date) {
+                $http.get("/api/show/" + area + "&" + date, {
+                    transformResponse: function (cnv) {
+                        return cnv;
+                    }
+                })
+                .then(function success(data) {
+                    console.log(data);
+                    $scope.dataSetSchedule = data.data.Schedule.Shows.Show;
+                }, function (error) {
+                    console.log("error schedule");
+                });
+            }
+        });
+    </script>
+
+    <div class="container" ng-app="Finnkinosovellus" ng-controller="ScheduleController">
+        <form>
+            Päivä:
+            <input type="date" name="date" id="date">
+
+            <select name="teat" id="teat">
+                <option value="1">Omateatteri 1</option>
+                <option value="2">Omateatteri 2</option>
+                <option value="3">Omateatteri 3</option>
+            </select>
+
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="Show in dataSetSchedule">
+                    <p><b>{{Show.Title}}</b></p>
+                    <p>Alkaa: {{Show.dttmShowStart | date:'HH:mm'}}</p>
+                    <p>Kesto: {{Show.LengthInMinutes}} minuuttia | Ikäraja: {{Show.Rating}}</p>
+                    <p>{{Show.TheatreAndAuditorium}} | Genre: {{Show.Genres}}</p>
+                </li>
+            </ul>
+
+            <button type="button" id="btnSearch" class="btn btn-warning" ng-click="search()">Etsi</button>
+        </form>
+    </div>
+</body>
+</html>
